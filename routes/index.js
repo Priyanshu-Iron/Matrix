@@ -5,6 +5,8 @@ const postModel = require('./post');
 const passport = require('passport');
 const localStrategy = require('passport-local')
 const upload = require('./multer')
+const uploadOnCLOUDINARY = require('../utils/cloudinary')
+const fs = require('fs');
 
 passport.use(new localStrategy(userModel.authenticate()))
 
@@ -66,25 +68,49 @@ router.get('/add', isLoggedIn, async function(req, res, next) {
   res.render('add',{user,nav: true});
 });
 
-router.post('/createpost', upload.single("postimage") ,isLoggedIn, async function(req, res, next) {
-  const user =  await userModel.findOne({username: req.session.passport.user});
-  const post = await postModel.create({
-    user: user._id,
-    title: req.body.title,
-    description: req.body.description,
-    image: req.file.filename
-  });
+router.post('/createpost', upload.single("postimage"), isLoggedIn, async function(req, res, next) {
+    const user = await userModel.findOne({ username: req.session.passport.user });
 
-  user.posts.push(post._id);
-  await user.save();
-  res.redirect("/profile")
+    let imageUrl = '';
+    if (req.file) {
+        try {
+            const cloudinaryResult = await uploadOnCLOUDINARY(req.file.path);
+            imageUrl = cloudinaryResult.secure_url;
+            
+            // Delete the file from the local server after uploading to Cloudinary
+            fs.unlinkSync(req.file.path);  // This deletes the file from the server
+        } catch (error) {
+            console.error('Error uploading to Cloudinary:', error);
+            return res.status(500).send('Error uploading image');
+        }
+    }
+
+    const post = await postModel.create({
+        user: user._id,
+        title: req.body.title,
+        description: req.body.description,
+        image: imageUrl
+    });
+
+    user.posts.push(post._id);
+    await user.save();
+    res.redirect("/profile");
 });
 
-router.post('/fileupload', isLoggedIn,upload.single("image"), async function(req, res, next) {
-  const user =  await userModel.findOne({username: req.session.passport.user});
-  user.profileImage = req.file.filename;
+router.post('/fileupload', isLoggedIn, upload.single("image"), async function(req, res, next) {
+  const user = await userModel.findOne({ username: req.session.passport.user });
+
+  if (req.file) {
+    const cloudinaryResult = await uploadOnCLOUDINARY(req.file.path);
+    user.profileImage = cloudinaryResult.secure_url;
+
+    // Remove the file after uploading to Cloudinary
+    const fs = require('fs');
+    fs.unlinkSync(req.file.path);  // This deletes the file from your local server
+  }
+
   await user.save();
-  res.redirect("/profile")
+  res.redirect("/profile");
 });
 
 router.post('/login', passport.authenticate("local",{
