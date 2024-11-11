@@ -20,7 +20,8 @@ router.post('/register',function(req,res,next){
   const data = new userModel({
     username: req.body.username,
     email: req.body.email,
-    contact: req.body.contact
+    contact: req.body.contact,
+    name: req.body.fullname
   })
 
   userModel.register(data, req.body.password)
@@ -43,6 +44,14 @@ router.get('/show/posts', isLoggedIn, async function(req, res, next) {
           .findOne({username: req.session.passport.user})
           .populate("posts")
   res.render('show',{user,nav: true});
+});
+
+router.get('/feed', isLoggedIn, async function(req, res, next) {
+  const user =  await userModel.findOne({username: req.session.passport.user})
+  const posts = await postModel.find()
+  .populate("user")
+
+  res.render("feed", {user,posts,nav: true})
 });
 
 router.get('/profile', isLoggedIn, async function(req, res, next) {
