@@ -1,9 +1,16 @@
 <% include ./partials/header.ejs %>
 <div class="w-full min-h-screen bg-zinc-800 px-10 py-8 text-white">
-    <div class="post-container">
-        <div class="post-header">
-            <h1 class="text-2xl font-bold"><%= post.title %></h1>
-            <h5 class="text-sm text-gray-500">Posted by @<%= post.user.username %></h5>
+    <div class="post-container items-center">
+        <div class="flex flex-row justify-between">
+            <div class="post-header">
+                <h1 class="text-2xl font-bold"><%= post.title %></h1>
+                <h5 class="text-sm text-gray-500">Posted by @<%= post.user.username %></h5>
+            </div>
+            <div class="flex flex-row items-center">
+                <a href="<%= post.image %>" download="<%= post.title %>-image.jpg" class="flex flex-row space-x-4 bg-white items-center text-black px-3 py-2 rounded-3xl font-bold">
+                    <div><span>Download</span></div> <div class="ri-download-line"></div>
+                </a>
+            </div>
         </div>
         <div class="post-image mt-4">
             <img class="w-full h-full object-cover" src="<%= post.image %>" alt="Post Image">
