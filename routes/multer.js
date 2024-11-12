@@ -18,8 +18,6 @@
 
 // const upload = multer({ storage: storage });
 // module.exports = upload;
-
-
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -27,7 +25,6 @@ const fs = require('fs');
 // Set up multer to store files temporarily in the /tmp directory (Vercel allowed writable directory)
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    // Use the /tmp directory provided by Vercel
     const uploadDir = '/tmp/uploads';  // /tmp is writable on Vercel
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });  // Ensure the directory exists
@@ -39,6 +36,11 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ storage: storage });
+// Set the file size limit (e.g., 5MB)
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 4.2 * 1024 * 1024 }  // 5MB size limit
+});
 
 module.exports = upload;
+

@@ -135,24 +135,32 @@ router.post('/createpost', upload.single("postimage"), isLoggedIn, async functio
 });
 
 router.post('/fileupload', isLoggedIn, upload.single("image"), async function(req, res, next) {
-  const user = await userModel.findOne({ username: req.session.passport.user });
-
-  if (req.file) {
-    try {
-      const cloudinaryResult = await uploadOnCLOUDINARY(req.file.path);
-      user.profileImage = cloudinaryResult.secure_url;
-
-      // Remove the file after uploading to Cloudinary
-      fs.unlinkSync(req.file.path);
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      return res.status(500).send("Error uploading image");
-    }
+  if (req.fileValidationError) {
+    return res.status(400).send("File size exceeds the limit.");
   }
 
-  await user.save();
-  res.redirect("/profile");
+  const user = await userModel.findOne({ username: req.session.passport.user });
+
+  if (!req.file) {
+    return res.status(400).send("No file uploaded");
+  }
+
+  try {
+    const cloudinaryResult = await uploadOnCLOUDINARY(req.file.path);
+    user.profileImage = cloudinaryResult.secure_url;
+
+    // Remove the file after uploading to Cloudinary
+    fs.unlinkSync(req.file.path);
+
+    await user.save();
+    res.redirect("/profile");
+
+  } catch (error) {
+    console.error("Error uploading image:", error);
+    return res.status(500).send("Error uploading image");
+  }
 });
+
 
 router.post('/login', passport.authenticate("local", {
   failureRedirect: "/",
