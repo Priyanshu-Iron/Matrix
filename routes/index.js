@@ -81,7 +81,6 @@ router.get('/feed', isLoggedIn, async function(req, res, next) {
   }
 });
 
-
 router.get('/feed/post/:postId', isLoggedIn, async function(req, res, next) {
   try {
     // Fetch the post by ID and populate the user field
@@ -100,7 +99,6 @@ router.get('/feed/post/:postId', isLoggedIn, async function(req, res, next) {
     next(error);
   }
 });
-
 
 router.get('/add', isLoggedIn, async function(req, res, next) {
   const user = await userModel.findOne({ username: req.session.passport.user });
