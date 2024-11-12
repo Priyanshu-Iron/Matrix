@@ -2,9 +2,9 @@
 <div class="w-full min-h-screen bg-zinc-800 px-10 py-8 text-white">
     <div class="cards flex flex-wrap gap-10">
         <% posts.forEach(function(elem) { %>
-            <div class="cards w-60">
-                <div class="w-full h-40 bg-sky-200 rounded-lg overflow-hidden ">
-                    <!-- Corrected link to point to /feed/post/:postId -->
+            <div class="cards w-full">
+                <div class="w-full min-h-screen">
+                    <!-- Update the anchor tag to link to the single post page using the post's ID -->
                     <a href="/feed/post/<%= elem._id %>">
                         <img class="w-full h-full object-cover" src="<%= elem.image %>" alt="Post Image">
                     </a>
